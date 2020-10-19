@@ -68,6 +68,13 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware{
     private fun bindUI() = launch {
         val currentWeather = viewModel.weather.await()
 
+        val weatherLocation = viewModel.weatherLocation.await()
+
+        weatherLocation.observe(viewLifecycleOwner, Observer { location ->
+            if (location == null) return@Observer
+            updateLocation(location.name)
+        })
+
         currentWeather.observe(viewLifecycleOwner, Observer {
             //null check for avoid error to show the toString is used in a null object
             if (it == null) return@Observer
@@ -75,7 +82,7 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware{
             //Hide the loading prograss bar and loading text from the layout
             groupLoading.visibility = View.GONE
 
-            updateLocation("Jorhat")
+
             updateDateToToday()
             updateTemperature(it.temperature, it.feelsLikeTemperature)
             updateCondition(it.conditionText)
@@ -84,7 +91,7 @@ class CurrentWeatherFragment : ScopeFragment(), KodeinAware{
             updateVisibility(it.visibilityDistance)
 
             GlideApp.with(this@CurrentWeatherFragment)
-                .load("http:${it.conditionIconUrl}")
+                .load("https:${it.conditionIconUrl}")
                 .into(imageView_ConditionIcon)
         })
     }
